@@ -12,6 +12,8 @@ import path from 'path';
 import { app, BrowserWindow, shell, ipcMain } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
+import fs from 'fs';
+import { default as ollama } from 'ollama';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
 
@@ -24,11 +26,41 @@ class AppUpdater {
 }
 
 let mainWindow: BrowserWindow | null = null;
+const chatHistory: any[] = [];
 
 ipcMain.on('ipc-example', async (event, arg) => {
-  const msgTemplate = (pingPong: string) => `IPC test: ${pingPong}`;
-  console.log(msgTemplate(arg));
-  event.reply('ipc-example', msgTemplate('pong'));
+  event.reply('ipc-example', arg);
+});
+
+ipcMain.on('chat', async (event, arg) => {
+  let response: string = '';
+
+  const streamResponse = await ollama.chat({
+    model: arg.modelName,
+    messages: [...chatHistory, { role: 'user', content: arg.message }],
+    stream: true,
+    options: {
+      num_ctx: 4096,
+    },
+  });
+
+  chatHistory.push({ role: 'assistant', content: arg.message });
+
+  for await (const part of streamResponse) {
+    response += part.message.content;
+
+    event.reply('chat', response);
+  }
+});
+
+ipcMain.on('fetch-models', async (event) => {
+  const models = fs.readFileSync(`${process.cwd()}/assets/models.json`, 'utf8');
+  const installedModels = await ollama.list();
+
+  event.reply('fetch-models', {
+    installedModels: installedModels.models,
+    models,
+  });
 });
 
 if (process.env.NODE_ENV === 'production') {

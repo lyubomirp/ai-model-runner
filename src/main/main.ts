@@ -68,7 +68,7 @@ ipcMain.on('fetch-all-models', async (event) => {
 
       model.tags.forEach((tagName: string, idx: number) => {
         if (tagName === tag) {
-          model.tags[idx] = `${tagName}-installed`;
+          model.tags[idx] = `${tagName}|installed`;
         }
       });
     });

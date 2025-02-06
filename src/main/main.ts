@@ -12,8 +12,10 @@ import path from 'path';
 import { app, BrowserWindow, shell, ipcMain } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
-import fs from 'fs';
 import { default as ollama } from 'ollama';
+import * as childProcess from 'node:child_process';
+import fs from 'fs';
+import { Exception } from 'sass';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
 
@@ -27,10 +29,6 @@ class AppUpdater {
 
 let mainWindow: BrowserWindow | null = null;
 const chatHistory: any[] = [];
-
-ipcMain.on('ipc-example', async (event, arg) => {
-  event.reply('ipc-example', arg);
-});
 
 ipcMain.on('chat', async (event, arg) => {
   let response: string = '';
@@ -53,14 +51,30 @@ ipcMain.on('chat', async (event, arg) => {
   }
 });
 
-ipcMain.on('fetch-models', async (event) => {
-  const models = fs.readFileSync(`${process.cwd()}/assets/models.json`, 'utf8');
+ipcMain.on('fetch-all-models', async (event) => {
+  const models = fs.readFileSync(`${process.cwd()}/resources/models.json`, {
+    encoding: 'utf8',
+  });
   const installedModels = await ollama.list();
 
-  event.reply('fetch-models', {
-    installedModels: installedModels.models,
-    models,
-  });
+  const parsedModels = JSON.parse(models);
+
+  if (installedModels.models) {
+    installedModels.models.forEach((el) => {
+      const [name, tag] = el.name.split(':');
+      const model = parsedModels.find((m: any) => m.name === name);
+
+      model.installed = true;
+
+      model.tags.forEach((tagName: string, idx: number) => {
+        if (tagName === tag) {
+          model.tags[idx] = `${tagName}-installed`;
+        }
+      });
+    });
+  }
+
+  event.reply('fetch-all-models', parsedModels);
 });
 
 if (process.env.NODE_ENV === 'production') {

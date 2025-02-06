@@ -1,12 +1,6 @@
 import { useRef } from 'react';
 
-function ModelDetails({
-  model,
-  installedModel,
-}: {
-  model: any;
-  installedModel: any;
-}) {
+function ModelDetails({ model }: { model: any }) {
   const replyEl = useRef<HTMLDivElement>(null);
   const inputEl = useRef<HTMLTextAreaElement>(null);
 
@@ -14,7 +8,7 @@ function ModelDetails({
     if (msg) {
       window.electron.ipcRenderer.sendMessage('chat', {
         message: msg,
-        modelName: installedModel?.name,
+        modelName: model.name,
       });
     }
   };
@@ -27,7 +21,7 @@ function ModelDetails({
 
   return (
     <div className="flex flex-col w-2/3">
-      <h2 style={{ color: 'black' }}> {model?.name} </h2>
+      <h2 className="text-capitalize">{model.name.replaceAll('-', ' ')}</h2>
       <p>{model?.description}</p>
       {/* <ul className="list-unstyled flex flex-col flex-wrap"> */}
       {/*  {model?.tags?.map((tag: any) => <li key={tag}>{tag}</li>)} */}
@@ -36,12 +30,7 @@ function ModelDetails({
       <div className="flex flex-col gap-2">
         <div className="flex flex-col gap-1">
           Message:
-          <textarea
-            className="p-1"
-            ref={inputEl}
-            cols={3}
-            style={{ minHeight: 100 }}
-          />
+          <textarea className="p-1 min-h-20" ref={inputEl} cols={3} />
           <button
             type="button"
             className="max-w-1/3"
@@ -54,8 +43,7 @@ function ModelDetails({
           Reply:
           <div
             ref={replyEl}
-            className="border border-solid border-black rounded-1 p-1"
-            style={{ minHeight: 100 }}
+            className="border border-solid border-black rounded-1 p-1 min-h-20"
           />
         </div>
       </div>

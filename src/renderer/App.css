@@ -8,7 +8,6 @@ body {
   height: 100vh;
   margin: 0 2rem;
   font-family: sans-serif;
-  overflow-y: hidden;
 }
 
 .flex {

@@ -13,9 +13,7 @@ import { app, BrowserWindow, shell, ipcMain } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import { default as ollama } from 'ollama';
-import * as childProcess from 'node:child_process';
 import fs from 'fs';
-import { Exception } from 'sass';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
 
@@ -28,21 +26,31 @@ class AppUpdater {
 }
 
 let mainWindow: BrowserWindow | null = null;
-const chatHistory: any[] = [];
+const chatHistory: any = {};
 
 ipcMain.on('chat', async (event, arg) => {
   let response: string = '';
 
+  if (!chatHistory[arg.modelName]) {
+    chatHistory[arg.modelName] = [];
+  }
+
   const streamResponse = await ollama.chat({
     model: arg.modelName,
-    messages: [...chatHistory, { role: 'user', content: arg.message }],
+    messages: [
+      ...chatHistory[arg.modelName],
+      { role: 'user', content: arg.message },
+    ],
     stream: true,
     options: {
       num_ctx: 4096,
     },
   });
 
-  chatHistory.push({ role: 'assistant', content: arg.message });
+  chatHistory[arg.modelName] = [
+    ...chatHistory[arg.modelName],
+    { role: 'assistant', content: arg.message },
+  ];
 
   for await (const part of streamResponse) {
     response += part.message.content;

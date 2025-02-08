@@ -1,30 +1,16 @@
-import { useRef, useState } from 'react';
-import Dropdown from '../components/dropdown';
+import { useState } from 'react';
+import Dropdown from '../components/Dropdown';
 
 function ModelDetails({ model }: { model: any }) {
-  // const replyEl = useRef<HTMLDivElement>(null);
-  // const inputEl = useRef<HTMLTextAreaElement>(null);
-
-  const [openTags, setOpenTags] = useState<Record<string, boolean>>({});
+  const [openTag, setOpenTag] = useState<string | null>();
 
   const isInstalled = (tag: string) => {
     return tag.includes('|');
   };
 
-  // const sendMsg = (msg: string | undefined) => {
-  //   if (msg) {
-  //     window.electron.ipcRenderer.sendMessage('chat', {
-  //       message: msg,
-  //       modelName: model.name,
-  //     });
-  //   }
-  // };
-
-  // window.electron.ipcRenderer.on('chat', (data: any) => {
-  //   if (replyEl?.current) {
-  //     replyEl.current.innerText = data;
-  //   }
-  // });
+  const cleanTagName = (tag: string) => {
+    return tag.replace('|installed', '');
+  };
 
   return (
     <div className="flex flex-col px-2">
@@ -41,42 +27,18 @@ function ModelDetails({ model }: { model: any }) {
                 py-2 min-w-full rounded-1 cursor-pointer
                 ${isInstalled(tag) ? 'bg-green text-white' : 'bg-transparent'}
               `}
-              key={`${tag}-btn`}
-              onClick={() =>
-                setOpenTags({ ...openTags, [tag]: !openTags[tag] })
-              }
+              onClick={() => setOpenTag(openTag === tag ? null : tag)}
             >
-              {tag.replace('|installed', ' ')}
+              {cleanTagName(tag)}
             </button>
             <Dropdown
-              key={`${tag}-dropdown`}
-              open={openTags[tag]}
+              open={openTag === tag}
               isInstalled={isInstalled(tag)}
+              model={`${model.name}:${cleanTagName(tag)}`}
             />
           </li>
         ))}
       </ul>
-
-      {/* <div className="flex flex-col gap-2"> */}
-      {/*  <div className="flex flex-col gap-1"> */}
-      {/*    Message: */}
-      {/*    <textarea className="p-1 min-h-20" ref={inputEl} cols={3} /> */}
-      {/*    <button */}
-      {/*      type="button" */}
-      {/*      className="max-w-1/3" */}
-      {/*      onClick={() => sendMsg(inputEl?.current?.value)} */}
-      {/*    > */}
-      {/*      Send */}
-      {/*    </button> */}
-      {/*  </div> */}
-      {/*  <div className="flex flex-col gap-1"> */}
-      {/*    Reply: */}
-      {/*    <div */}
-      {/*      ref={replyEl} */}
-      {/*      className="border border-solid border-black rounded-1 p-1 min-h-20" */}
-      {/*    /> */}
-      {/*  </div> */}
-      {/* </div> */}
     </div>
   );
 }

@@ -1,9 +1,13 @@
+import { Link } from 'react-router-dom';
+
 function Dropdown({
   open,
   isInstalled,
+  model,
 }: {
   open: boolean;
   isInstalled: boolean;
+  model: any;
 }) {
   return (
     <div
@@ -15,8 +19,14 @@ function Dropdown({
       `}
       style={{ right: '-20%' }}
     >
-      {isInstalled && <span>Run</span>}
-      <span>{isInstalled ? 'Uninstall' : 'Install'}</span>
+      {isInstalled && (
+        <Link to="/chat" state={model}>
+          Run
+        </Link>
+      )}
+      <Link to="/" state={model}>
+        {isInstalled ? 'Uninstall' : 'Install'}
+      </Link>
     </div>
   );
 }

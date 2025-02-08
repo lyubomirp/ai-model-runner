@@ -3,6 +3,7 @@ import './App.css';
 import { MemoryRouter as Router, Routes, Route } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import ModelDetails from './ModelDetails';
+import ChatWindow from './ChatWindow';
 
 declare global {
   interface Window {
@@ -44,7 +45,6 @@ function Hello() {
                      border-solid border-black'
                   `}
                   onClick={() => setModel(m)}
-                  key={`${m.name}-btn`}
                 >
                   {m.name}
                 </button>
@@ -53,7 +53,9 @@ function Hello() {
           })}
         </ul>
       </div>
-      <div className="w-2/3">{model && <ModelDetails model={model} />}</div>
+      <div className="w-2/3" key={model?.name}>
+        {model && <ModelDetails model={model} />}
+      </div>
     </div>
   );
 }
@@ -63,6 +65,7 @@ export default function App() {
     <Router>
       <Routes>
         <Route path="/" element={<Hello />} />
+        <Route path="/chat" element={<ChatWindow />} />
       </Routes>
     </Router>
   );

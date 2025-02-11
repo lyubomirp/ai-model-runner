@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Dropdown from '../components/Dropdown';
 
 function ModelDetails({ model }: { model: any }) {
@@ -11,6 +11,21 @@ function ModelDetails({ model }: { model: any }) {
   const cleanTagName = (tag: string) => {
     return tag.replace('|installed', '');
   };
+
+  useEffect(() => {
+    window.electron.ipcRenderer.on('install-model', (m: any[]) => {
+      console.log(m);
+    });
+
+    window.electron.ipcRenderer.on('delete-model', (m: any[]) => {
+      console.log(m);
+    });
+
+    return () => {
+      window.electron.ipcRenderer.removeListener('install-model');
+      window.electron.ipcRenderer.removeListener('delete-model');
+    };
+  }, [openTag]);
 
   return (
     <div className="flex flex-col px-2">

@@ -23,6 +23,10 @@ function Hello() {
     window.electron.ipcRenderer.once('fetch-all-models', (m: any[]) => {
       setModels(m.sort((el: any) => -el.installed));
     });
+
+    return function cleanup() {
+      window.electron.ipcRenderer.removeListener('fetch-all-models');
+    };
   }, [models]);
 
   return (

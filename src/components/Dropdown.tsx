@@ -9,6 +9,14 @@ function Dropdown({
   isInstalled: boolean;
   model: any;
 }) {
+  const getOperation = (): string => {
+    return isInstalled ? 'delete-model' : 'install-model';
+  };
+
+  const addRemoveModel = (modelName: string) => {
+    window.electron.ipcRenderer.sendMessage(getOperation(), { modelName });
+  };
+
   return (
     <div
       className={`
@@ -24,9 +32,9 @@ function Dropdown({
           Run
         </Link>
       )}
-      <Link to="/" state={model}>
+      <button type="button" onClick={() => addRemoveModel(model)}>
         {isInstalled ? 'Uninstall' : 'Install'}
-      </Link>
+      </button>
     </div>
   );
 }

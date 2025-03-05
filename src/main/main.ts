@@ -61,23 +61,21 @@ ipcMain.on('chat', async (event, arg) => {
 
 ipcMain.on('delete-model', async (event, { modelName }) => {
   const response = await ollama.delete({ model: modelName });
-  event.reply('remove-model', response);
+  event.reply('delete-model', response);
 });
 
 ipcMain.on('install-model', async (event, { modelName }) => {
-  const streamResponse = await ollama.create({
+  const streamResponse = await ollama.pull({
     model: modelName,
-    from: modelName.split(':')[0],
     stream: true,
   });
-  let response = '';
 
   for await (const part of streamResponse) {
-    response += part.status;
-
-    event.reply('chat', response);
+    event.reply('install-model', {
+      total: part.total,
+      completed: part.completed,
+    });
   }
-  event.reply('install-model', response);
 });
 
 ipcMain.on('fetch-all-models', async (event) => {
